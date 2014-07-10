@@ -13,7 +13,7 @@ class tempest(
   $tempest_clone_path        = '/var/lib/tempest',
   $tempest_clone_owner       = 'root',
 
-  $setup_venv                = false,
+  $setup_venv                = true,
 
   # Glance image config
   #
@@ -97,7 +97,7 @@ class tempest(
     revision => $tempest_repo_revision,
     provider => 'git',
     require  => Package['git'],
-    user     => $tempest_clone_owner,
+#    user     => $tempest_clone_owner,
   }
 
   if $setup_venv {
@@ -115,6 +115,22 @@ class tempest(
   }
 
   $tempest_conf = "${tempest_clone_path}/etc/tempest.conf"
+  
+  exec { 'init_testr':
+  command => '/usr/local/bin/testr init',
+  creates => '/var/lib/tempest/.testrepository/',
+  cwd     => $tempest_clone_path,
+  } ->
+  exec { 'run-tests':
+    command => "/usr/local/bin/testr run tempest.api.compute.flavors.test_flavors_negative.py",
+    cwd     => $tempest_clone_path,
+    require => [
+        Vcsrepo[$tempest_clone_path],
+        Exec['install-tox'],
+        Package[$tempest::params::dev_packages],
+      ],
+  }
+
 
   file { $tempest_conf:
     replace => false,
