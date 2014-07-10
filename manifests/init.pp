@@ -120,6 +120,8 @@ class tempest(
   command => '/usr/local/bin/testr init',
   creates => '/var/lib/tempest/.testrepository/',
   cwd     => $tempest_clone_path,
+  require => [
+        Vcsrepo[$tempest_clone_path]],
   } ->
   exec { 'run-tests':
     command => "/usr/local/bin/testr run tempest.api.compute.flavors.test_flavors_negative.py",
