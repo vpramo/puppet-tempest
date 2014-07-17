@@ -116,15 +116,23 @@ class tempest(
 
   $tempest_conf = "${tempest_clone_path}/etc/tempest.conf"
   
+  file { '/var/lib/tempest/run_tempest.sh':
+   ensure => present,
+   owner => 'root',
+   group => 'root',
+   mode => '0755',
+  }
+  
   exec { 'init_testr':
   command => '/usr/local/bin/testr init',
   creates => '/var/lib/tempest/.testrepository/',
   cwd     => $tempest_clone_path,
+  before  => File['/var/lib/tempest/run_tempest.sh'],
   require => [
         Vcsrepo[$tempest_clone_path]],
   } ->
-  exec { 'run-tests':
-    command => "/usr/local/bin/testr run tempest.api.compute.flavors.test_flavors_negative.py",
+  exec { '/var/lib/tempest/run_tempest.sh':
+    #command => "/usr/local/bin/testr run tempest.api.compute.flavors.test_flavors_negative.py",
     cwd     => $tempest_clone_path,
     require => [
         Vcsrepo[$tempest_clone_path],
