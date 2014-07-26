@@ -67,7 +67,10 @@ class tempest(
   $horizon_available         = true,
   $neutron_available         = false,
   $nova_available            = true,
-  $swift_available           = false
+  $swift_available           = false,
+  # logging 
+  $debug                     = true,
+  $log_file                  = 'tempest.log'
 ) {
 
   include 'tempest::params'
@@ -131,9 +134,10 @@ class tempest(
   require => [
         Vcsrepo[$tempest_clone_path]],
   } ->
-  exec { '/var/lib/tempest/run_tempest.sh':
+  exec {'/var/lib/tempest/run_tempest.sh tempest.api.compute.keypairs':
     #command => "/usr/local/bin/testr run tempest.api.compute.flavors.test_flavors_negative.py",
     cwd     => $tempest_clone_path,
+    logoutput => true,
     require => [
         Vcsrepo[$tempest_clone_path],
         Exec['install-tox'],
@@ -185,6 +189,8 @@ class tempest(
     'service_available/nova':            value => $nova_available;
     'service_available/swift':           value => $swift_available;
     'whitebox/db_uri':                   value => $whitebox_db_uri;
+    'DEFAULT/debug':                     value => $debug;
+    'DEFAULT/log_file':                  value => $log_file;
     'cli/cli_dir':                       value => $cli_dir;
   }
 
