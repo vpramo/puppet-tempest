@@ -25,6 +25,7 @@ class tempest(
   #
   $configure_networks        = true,
   $public_network_name       = undef,
+  $fixed_network_name        = undef,
 
   # tempest.conf parameters
   #
@@ -151,6 +152,7 @@ class tempest(
     'identity/username':                 value => $username;
     'network/public_network_id':         value => $public_network_id;
     'network/public_router_id':          value => $public_router_id;
+    'network/fixed_network_name':        value => $fixed_network_name;
     'service_available/cinder':          value => $cinder_available;
     'service_available/glance':          value => $glance_available;
     'service_available/heat':            value => $heat_available;
