@@ -15,4 +15,45 @@ Puppet::Type.type(:tempest_config).provide(
     '='
   end
 
+  def glance_image_id
+    @image_id ||= Puppet::Resource.indirection.find("Glance_image/#{resource[:value]}")[:id]
+    @image_id if @image_id != :absent
+  end
+
+  def network_id
+    @network_id ||= Puppet::Resource.indirection.find("Neutron_network/#{resource[:value]}")[:id]
+    @network_id if @network_id != :absent
+  end
+
+  def getval
+    if @val
+      return @val
+    end
+    if ! resource[:set_id]
+      @val = resource[:value]
+    elsif resource[:set_id] == 'glance_image'
+      @val = glance_image_id
+    elsif resource[:set_id] == 'network'
+      @val = network_id
+    end
+    return @val
+  end
+
+  def create
+    ini_file.set_value(section, setting, getval)
+    ini_file.save
+    @ini_file = nil
+  end
+
+  def value
+    if ini_file.get_value(section, setting) == getval
+      return resource[:value]
+    end
+  end
+
+  def value=(value)
+    ini_file.set_value(section, setting, getval)
+    ini_file.save
+  end
+
 end

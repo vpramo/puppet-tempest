@@ -36,7 +36,16 @@ describe 'tempest' do
       end
 
       it 'uses a resource to configure image_ref from image_name' do
-        should contain_tempest_glance_id_setter('image_ref').with_image_name('cirros')
+        should contain_tempest_config('compute/image_ref').with({
+          'value'  => 'cirros',
+          'set_id' => 'glance_image',
+        })
+
+        should contain_tempest_config('compute/image_ref_alt').with({
+          'value'  => 'cirros',
+          'set_id' => 'glance_image',
+        })
+
       end
     end
 
@@ -73,7 +82,10 @@ describe 'tempest' do
       end
 
       it 'uses a resource to configure public_network_id from public_network_name' do
-        should contain_tempest_neutron_net_id_setter('public_network_id').with_network_name('public')
+        should contain_tempest_config('network/public_network_id').with({
+          'value'  => 'public',
+          'set_id' => 'network'
+        })
       end
     end
 
@@ -149,8 +161,6 @@ describe 'tempest' do
           should contain_tempest_config('compute/flavor_ref').with(:value => nil)
           should contain_tempest_config('compute/flavor_ref_alt').with(:value => nil)
           should contain_tempest_config('compute/image_alt_ssh_user').with(:value => nil)
-          should contain_tempest_config('compute/image_ref').with(:value => nil)
-          should contain_tempest_config('compute/image_ref_alt').with(:value => nil)
           should contain_tempest_config('compute/image_ssh_user').with(:value => nil)
           should contain_tempest_config('compute/resize_available').with(:value => nil)
           should contain_tempest_config('compute/allow_tenant_isolation').with(:value => nil)
@@ -169,7 +179,6 @@ describe 'tempest' do
           should contain_tempest_config('identity/uri').with(:value => nil)
           should contain_tempest_config('identity/username').with(:value => nil)
           should contain_tempest_config('network/fixed_network_name').with(:value => nil)
-          should contain_tempest_config('network/public_network_id').with(:value => nil)
           should contain_tempest_config('network/public_router_id').with(:value => '')
           should contain_tempest_config('service_available/cinder').with(:value => true)
           should contain_tempest_config('service_available/glance').with(:value => true)
@@ -182,27 +191,21 @@ describe 'tempest' do
         end
 
         it 'set glance id' do
-          should contain_tempest_glance_id_setter('image_ref').with(
-            :ensure            => 'present',
-            :tempest_conf_path => '/var/lib/tempest/etc/tempest.conf',
-            :image_name        => 'image name',
-            :require           => 'File[/var/lib/tempest/etc/tempest.conf]'
+          should contain_tempest_config('compute/image_ref').with(
+            :value  => 'image name',
+            :set_id => 'glance_image'
           )
 
-          should contain_tempest_glance_id_setter('image_ref_alt').with(
-            :ensure            => 'present',
-            :tempest_conf_path => '/var/lib/tempest/etc/tempest.conf',
-            :image_name        => 'image name alt',
-            :require           => 'File[/var/lib/tempest/etc/tempest.conf]'
+          should contain_tempest_config('compute/image_ref_alt').with(
+            :value  => 'image name alt',
+            :set_id => 'glance_image'
           )
         end
 
         it 'neutron net id' do
-          should contain_tempest_neutron_net_id_setter('public_network_id').with(
-            :ensure            => 'present',
-            :tempest_conf_path => '/var/lib/tempest/etc/tempest.conf',
-            :network_name      => 'network name',
-            :require           => 'File[/var/lib/tempest/etc/tempest.conf]'
+          should contain_tempest_config('network/public_network_id').with(
+            :value  => 'network name',
+            :set_id => 'network',
           )
         end
       end

@@ -134,8 +134,6 @@ class tempest(
     'compute/flavor_ref':                value => $flavor_ref;
     'compute/flavor_ref_alt':            value => $flavor_ref_alt;
     'compute/image_alt_ssh_user':        value => $image_alt_ssh_user;
-    'compute/image_ref':                 value => $image_ref;
-    'compute/image_ref_alt':             value => $image_ref_alt;
     'compute/image_ssh_user':            value => $image_ssh_user;
     'compute/resize_available':          value => $resize_available;
     'compute/allow_tenant_isolation':    value => $allow_tenant_isolation;
@@ -150,7 +148,6 @@ class tempest(
     'identity/tenant_name':              value => $tenant_name;
     'identity/uri':                      value => $identity_uri;
     'identity/username':                 value => $username;
-    'network/public_network_id':         value => $public_network_id;
     'network/public_router_id':          value => $public_router_id;
     'network/fixed_network_name':        value => $fixed_network_name;
     'service_available/cinder':          value => $cinder_available;
@@ -165,43 +162,60 @@ class tempest(
   }
 
   if $configure_images {
+
+    ##
+    # If the image id was not provided, look it up via the image name
+    # and set the value in the conf file.
+    ##
+
     if ! $image_ref and $image_name {
-      # If the image id was not provided, look it up via the image name
-      # and set the value in the conf file.
-      tempest_glance_id_setter { 'image_ref':
-        ensure            => present,
-        tempest_conf_path => $tempest_conf,
-        image_name        => $image_name,
-        require           => File[$tempest_conf],
-      }
+      $image_uuid_set = 'glance_image'
+      $image_ref_orig = $image_name
+    } elsif ! $image_name and $image_ref {
+      $image_ref_orig = $image_ref
     } elsif ($image_name and $image_ref) or (! $image_name and ! $image_ref) {
       fail('A value for either image_name or image_ref must be provided.')
     }
+
     if ! $image_ref_alt and $image_name_alt {
-      tempest_glance_id_setter { 'image_ref_alt':
-        ensure            => present,
-        tempest_conf_path => $tempest_conf,
-        image_name        => $image_name_alt,
-        require           => File[$tempest_conf],
-      }
+      $image_uuid_set_alt = 'glance_image'
+      $image_ref_alt_orig = $image_name_alt
+    } elsif ! $image_name_alt and $image_ref_alt {
+      $image_ref_alt_orig = $image_ref_alt
     } elsif ($image_name_alt and $image_ref_alt) or (! $image_name_alt and ! $image_ref_alt) {
-        fail('A value for either image_name_alt or image_ref_alt must \
-be provided.')
+      fail('A value for either image_name_alt or image_ref_alt must be provided.')
+    }
+
+    if $image_ref_orig {
+      tempest_config {'compute/image_ref':
+        value  => $image_ref_orig,
+        set_id => $image_uuid_set,
+      }
+    }
+
+    if $image_ref_alt_orig {
+      tempest_config {'compute/image_ref_alt':
+        value  => $image_ref_alt_orig,
+        set_id => $image_uuid_set_alt,
+      }
     }
   }
 
   if $neutron_available and $configure_networks {
     if ! $public_network_id and $public_network_name {
-      tempest_neutron_net_id_setter { 'public_network_id':
-        ensure            => present,
-        tempest_conf_path => $tempest_conf,
-        network_name      => $public_network_name,
-        require           => File[$tempest_conf],
-      }
+      $public_network_uuid_set = 'network'
+      $public_network_ref_orig = $public_network_name
+    } elsif ! $public_network_name and $public_network_id {
+      $public_network_ref_orig = $public_network_id
     } elsif ($public_network_name and $public_network_id) or (! $public_network_name and ! $public_network_id) {
-      fail('A value for either public_network_id or public_network_name \
-  must be provided.')
+      fail('A value for either public_network_id or public_network_name must be provided.')
+    }
+
+    if $public_network_ref_orig {
+      tempest_config {'network/public_network_id':
+        value  => $public_network_ref_orig,
+        set_id => $public_network_uuid_set,
+      }
     }
   }
-
 }
