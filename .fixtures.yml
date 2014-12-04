@@ -3,5 +3,8 @@ fixtures:
     stdlib: 'git://github.com/puppetlabs/puppetlabs-stdlib.git'
     inifile: 'git://github.com/puppetlabs/puppetlabs-inifile'
     vcsrepo: 'git://github.com/puppetlabs/puppetlabs-vcsrepo'
+    keystone: 'git://github.com/stackforge/puppet-keystone'
+    glance: 'git://github.com/stackforge/puppet-glance'
+    neutron: 'git://github.com/stackforge/puppet-neutron'
   symlinks:
     tempest: "#{source_dir}"
