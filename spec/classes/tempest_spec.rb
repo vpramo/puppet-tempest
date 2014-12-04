@@ -168,6 +168,7 @@ describe 'tempest' do
           should contain_tempest_config('identity/tenant_name').with(:value => nil)
           should contain_tempest_config('identity/uri').with(:value => nil)
           should contain_tempest_config('identity/username').with(:value => nil)
+          should contain_tempest_config('network/fixed_network_name').with(:value => nil)
           should contain_tempest_config('network/public_network_id').with(:value => nil)
           should contain_tempest_config('network/public_router_id').with(:value => '')
           should contain_tempest_config('service_available/cinder').with(:value => true)
