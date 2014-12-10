@@ -81,6 +81,12 @@ class tempest(
 
   include 'tempest::params'
 
+  if $admin_tenant_name {
+    $admin_tenant_name_orig = $admin_tenant_name
+  } else {
+    $admin_tenant_name_orig = $tenant_name
+  }
+
   ensure_packages([
     'git',
     'python-setuptools',
@@ -146,12 +152,12 @@ class tempest(
   }
 
   Tempest_account_config {
-    path    => $tempest_account_yaml,
-    require => File[$tempest_account_yaml],
+    configfile => $tempest_account_yaml,
+    require    => File[$tempest_account_yaml],
   }
 
   tempest_config {
-    'DEFAULT/lock_path:                  value => $lock_path;
+    'DEFAULT/lock_path':                 value => $lock_path;
     'compute/change_password_available': value => $change_password_available;
     'compute/flavor_ref':                value => $flavor_ref;
     'compute/flavor_ref_alt':            value => $flavor_ref_alt;
@@ -160,7 +166,7 @@ class tempest(
     'compute/resize_available':          value => $resize_available;
     'compute/allow_tenant_isolation':    value => $allow_tenant_isolation;
     'identity/admin_password':           value => $admin_password, secret => true;
-    'identity/admin_tenant_name':        value => $admin_tenant_name;
+    'identity/admin_tenant_name':        value => $admin_tenant_name_orig;
     'identity/admin_username':           value => $admin_username;
     'identity/admin_role':               value => $admin_role;
     'identity/alt_password':             value => $alt_password, secret => true;
@@ -184,12 +190,12 @@ class tempest(
   }
 
   tempest_account_config {
-    "${username}@{tenant_name}":              password => $password;
-    "${admin_username}@{admin_tenant_name}":  password => $admin_password;
+    "${username}@${tenant_name}":                   password => $password;
+    "${admin_username}@${admin_tenant_name_orig}":  password => $admin_password;
   }
 
   if ($alt_username) and ($alt_password) and ($alt_tenant_name) {
-    tempest_account_config { "${alt_username}@{alt_tenant_name}":
+    tempest_account_config { "${alt_username}@${alt_tenant_name}":
       password => $alt_password
     }
   }
