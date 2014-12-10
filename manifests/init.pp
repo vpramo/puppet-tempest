@@ -5,6 +5,13 @@
 # Note that only parameters for which values are provided will be
 # managed in tempest.conf.
 #
+# == Parameters
+#
+# [*lock_path*]
+#   Directory to use lock files by tempest.
+#
+#
+
 class tempest(
   # Clone config
   #
@@ -29,6 +36,7 @@ class tempest(
 
   # tempest.conf parameters
   #
+  $lock_path                 = '/tmp',
   $identity_uri              = undef,
   $cli_dir                   = undef,
   # non admin user
@@ -116,6 +124,7 @@ class tempest(
   }
 
   $tempest_conf = "${tempest_clone_path}/etc/tempest.conf"
+  $tempest_account_yaml = "${tempest_clone_path}/etc/accounts.yaml"
 
   file { $tempest_conf:
     replace => false,
@@ -129,7 +138,20 @@ class tempest(
     require => File[$tempest_conf],
   }
 
+  file { $tempest_account_yaml:
+    replace => false,
+    ensure  => file,
+    require => Vcsrepo[$tempest_clone_path],
+    owner   => $tempest_clone_owner,
+  }
+
+  Tempest_account_config {
+    path    => $tempest_account_yaml,
+    require => File[$tempest_account_yaml],
+  }
+
   tempest_config {
+    'DEFAULT/lock_path:                  value => $lock_path;
     'compute/change_password_available': value => $change_password_available;
     'compute/flavor_ref':                value => $flavor_ref;
     'compute/flavor_ref_alt':            value => $flavor_ref_alt;
@@ -159,6 +181,17 @@ class tempest(
     'service_available/swift':           value => $swift_available;
     'whitebox/db_uri':                   value => $whitebox_db_uri;
     'cli/cli_dir':                       value => $cli_dir;
+  }
+
+  tempest_account_config {
+    "${username}@{tenant_name}":              password => $password;
+    "${admin_username}@{admin_tenant_name}":  password => $admin_password;
+  }
+
+  if ($alt_username) and ($alt_password) and ($alt_tenant_name) {
+    tempest_account_config { "${alt_username}@{alt_tenant_name}":
+      password => $alt_password
+    }
   }
 
   if $configure_images {
