@@ -4,8 +4,9 @@ Puppet::Type.type(:tempest_account_config).provide(:default) do
     begin
       @conf ||= YAML.load(File.read(config_file))
     rescue
-      @conf ||= {}
+      @conf ||= []
     end
+    @conf ||= []
   end
 
   def config_file
