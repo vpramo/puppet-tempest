@@ -38,6 +38,8 @@ class tempest(
   #
   $lock_path                 = '/tmp',
   $identity_uri              = undef,
+  $identity_uri_v3           = undef,
+
   $cli_dir                   = undef,
   # non admin user
   $username                  = undef,
@@ -175,6 +177,7 @@ class tempest(
     'identity/password':                 value => $password, secret => true;
     'identity/tenant_name':              value => $tenant_name;
     'identity/uri':                      value => $identity_uri;
+    'identity/uri_v3':                   value => $identity_uri_v3;
     'identity/username':                 value => $username;
     'network/public_router_id':          value => $public_router_id;
     'network/fixed_network_name':        value => $fixed_network_name;
