@@ -90,22 +90,18 @@ class tempest(
   }
 
   ensure_packages([
+    'python-pip',
     'git',
     'python-setuptools',
   ])
 
   ensure_packages($tempest::params::dev_packages)
 
-  exec { 'install-pip':
-    command => '/usr/bin/easy_install pip',
-    unless  => '/usr/bin/which pip',
-    require => Package['python-setuptools'],
-  }
-
   exec { 'install-tox':
-    command => "${tempest::params::pip_bin_path}/pip install -U tox",
+    command => "pip install -U tox",
+    path    => ['/bin','/sbin','/usr/bin','/usr/sbin','/usr/local/bin'],
     unless  => '/usr/bin/which tox',
-    require => Exec['install-pip'],
+    require => Package['python-pip'],
   }
 
   vcsrepo { $tempest_clone_path:
