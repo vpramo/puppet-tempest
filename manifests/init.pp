@@ -72,13 +72,15 @@ class tempest(
   # Upstream has a bad default - set it to empty string.
   $public_router_id          = '',
   # Service configuration
-  $cinder_available          = true,
   $glance_available          = true,
   $heat_available            = false,
   $horizon_available         = true,
   $neutron_available         = false,
   $nova_available            = true,
-  $swift_available           = false
+  $swift_available           = false,
+  # Cinder volume options
+  $cinder_available          = true,
+  $volume_storage_protocol   = 'iSCSI',
 ) {
 
   include 'tempest::params'
@@ -163,6 +165,7 @@ class tempest(
     'compute/image_ssh_user':            value => $image_ssh_user;
     'compute/resize_available':          value => $resize_available;
     'compute/allow_tenant_isolation':    value => $allow_tenant_isolation;
+    'compute/fixed_network_name':        value => $fixed_network_name;
     'identity/admin_password':           value => $admin_password, secret => true;
     'identity/admin_tenant_name':        value => $admin_tenant_name_orig;
     'identity/admin_username':           value => $admin_username;
@@ -186,6 +189,7 @@ class tempest(
     'service_available/swift':           value => $swift_available;
     'whitebox/db_uri':                   value => $whitebox_db_uri;
     'cli/cli_dir':                       value => $cli_dir;
+    'volume/storage_protocol':           value => $volume_storage_protocol;
   }
 
   tempest_account_config {
