@@ -5,22 +5,23 @@
 #   https://github.com/stackforge/puppet-openstack/blob/master/manifests/provision.pp
 #
 class tempest::provision (
-  $image_public           = 'yes',
-  $image_source           = 'http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img',
-  $imagename              = undef,
-  $alt_image_source       = undef,
-  $alt_imagename          = undef,
-  $tenantname             = undef,
-  $username               = undef,
-  $password               = 'tempest_pass',
-  $admin_username         = undef,
-  $admin_password         = 'tempest_admin_pass',
-  $networkname            = undef,
-  $subnetname             = 'sn_tempest',
-  $subnetcidr             = '10.0.0.0/24',
-  $alt_tenantname         = undef,
-  $alt_username           = undef,
-  $alt_password           = undef,
+  $image_public     = 'yes',
+  $image_source     = 'http://download.cirros-cloud.net/0.3.3/cirros-0.3.3-x86_64-disk.img',
+  $imagename        = undef,
+  $alt_image_source = undef,
+  $alt_imagename    = undef,
+  $tenantname       = undef,
+  $username         = undef,
+  $password         = 'tempest_pass',
+  $admin_username   = undef,
+  $admin_password   = 'tempest_admin_pass',
+  $networkname      = undef,
+  $subnetname       = 'sn_tempest',
+  $subnetcidr       = '10.0.0.0/24',
+  $alt_tenantname   = undef,
+  $alt_username     = undef,
+  $alt_password     = undef,
+  $user_extra_roles = ['Member','ResellerAdmin'],
 ) {
 
   ##
@@ -40,6 +41,11 @@ class tempest::provision (
       fail('Tenant name is required to create keystone user')
     }
 
+
+    keystone_role {$user_extra_roles:
+      ensure => present,
+    }
+
     keystone_user { $username:
       ensure      => present,
       enabled     => true,
@@ -47,8 +53,11 @@ class tempest::provision (
       password    => $password,
     }
 
+    $user_roles = concat($user_extra_roles,['_member_'])
+
     keystone_user_role {"${username}@${tenantname}":
-      roles => ['_member_']
+      roles   => [$user_roles],
+      require => Keystone_role[$user_extra_roles],
     }
   }
 
