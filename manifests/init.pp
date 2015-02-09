@@ -27,6 +27,10 @@ class tempest(
   $configure_images          = true,
   $image_name                = undef,
   $image_name_alt            = undef,
+  $image_ref                 = undef,
+  $image_ref_alt             = undef,
+  $image_ssh_user            = undef,
+  $image_alt_ssh_user        = undef,
 
   # Neutron network config
   #
@@ -54,11 +58,9 @@ class tempest(
   $admin_password            = undef,
   $admin_tenant_name         = undef,
   $admin_role                = undef,
-  # image information
-  $image_ref                 = undef,
-  $image_ref_alt             = undef,
-  $image_ssh_user            = undef,
-  $image_alt_ssh_user        = undef,
+  # flavor information
+  $flavor_name                = undef,
+  $flavor_name_alt            = undef,
   $flavor_ref                = undef,
   $flavor_ref_alt            = undef,
   # whitebox
@@ -159,8 +161,6 @@ class tempest(
   tempest_config {
     'DEFAULT/lock_path':                 value => $lock_path;
     'compute/change_password_available': value => $change_password_available;
-    'compute/flavor_ref':                value => $flavor_ref;
-    'compute/flavor_ref_alt':            value => $flavor_ref_alt;
     'compute/image_alt_ssh_user':        value => $image_alt_ssh_user;
     'compute/image_ssh_user':            value => $image_ssh_user;
     'compute/resize_available':          value => $resize_available;
@@ -201,6 +201,38 @@ class tempest(
     tempest_account_config { "${alt_username}@${alt_tenant_name}":
       password => $alt_password
     }
+  }
+
+  if ! $flavor_ref  and $flavor_name {
+    $flavor_uuid_set = 'flavor'
+    $flavor_ref_orig = $flavor_name
+  } elsif ! $flavor_name and $flavor_ref {
+    $flavor_ref_orig = $flavor_ref
+  } elsif ($flavor_name and $flavor_ref) or (! $flavor_name and ! $flavor_ref) {
+    fail('A value for either flavor_name or flavor_ref must be provided.')
+  }
+
+  if ! $flavor_ref_alt  and $flavor_name_alt {
+    $flavor_uuid_set_alt = 'flavor'
+    $flavor_ref_alt_orig = $flavor_name_alt
+  } elsif ! $flavor_name_alt and $flavor_ref_alt {
+    $flavor_ref_alt_orig = $flavor_ref_alt
+  } elsif $flavor_name_alt and $flavor_ref_alt  {
+    fail('either flavor_name_alt or flavor_ref_alt must be provided.')
+  }
+
+  if flavor_ref_orig {
+   tempest_config {'compute/flavor_ref':
+    value  => $flavor_ref_orig,
+    set_id => $flavor_uuid_set,
+   }
+  }
+
+  if flavor_ref_alt_orig {
+   tempest_config {'compute/flavor_ref_alt':
+    value  => $flavor_ref_alt_orig,
+    set_id => $flavor_uuid_set_alt,
+   }
   }
 
   if $configure_images {

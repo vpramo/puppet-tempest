@@ -25,6 +25,11 @@ Puppet::Type.type(:tempest_config).provide(
     @network_id if @network_id != :absent
   end
 
+  def flavor_id
+    @flavor_id ||= Puppet::Resource.indirection.find("Nova_flavor/#{resource[:value]}")[:id]
+    @flavor_id if @flavor_id != :absent
+  end
+
   def getval
     if @val
       return @val
@@ -35,6 +40,8 @@ Puppet::Type.type(:tempest_config).provide(
       @val = glance_image_id
     elsif resource[:set_id] == 'network'
       @val = network_id
+    elsif resource[:set_id] == 'flavor'
+      @val = flavor_id
     end
     return @val
   end
