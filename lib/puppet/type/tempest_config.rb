@@ -54,8 +54,8 @@ Puppet::Type.newtype(:tempest_config) do
           This is required as sometimes tempest need id(uuid) rather than name such as for image_ref, public_network_id.
           The values glance_image and network are valid.'
     validate do |value|
-      if value !~ /(glance_image|network)/
-        raise(Puppet::Error, "Invalid values, Valid values are: glance_image, network")
+      if value !~ /(glance_image|network|flavor)/
+        raise(Puppet::Error, "Invalid values, Valid values are: glance_image, network, flavor")
       end
     end
   end
