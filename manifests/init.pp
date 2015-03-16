@@ -203,29 +203,29 @@ class tempest(
     }
   }
 
-  if ! $flavor_ref  and $flavor_name {
+  if ($flavor_name and $flavor_ref) or (! $flavor_name and ! $flavor_ref) {
+    fail('Values setting or not setting for both flavor_name and flavor_ref are not valid')
+  } elsif $flavor_name {
     $flavor_uuid_set = 'flavor'
     $flavor_ref_orig = $flavor_name
-  } elsif ! $flavor_name and $flavor_ref {
+  } elsif $flavor_ref {
     $flavor_ref_orig = $flavor_ref
-  } elsif ($flavor_name and $flavor_ref) or (! $flavor_name and ! $flavor_ref) {
-    fail('A value for either flavor_name or flavor_ref must be provided.')
   }
 
-  if ! $flavor_ref_alt  and $flavor_name_alt {
+  if $flavor_name_alt and $flavor_ref_alt  {
+    fail('Both flavor_name_alt and flavor_ref_alt can not be provided')
+  } elsif $flavor_name_alt {
     $flavor_uuid_set_alt = 'flavor'
     $flavor_ref_alt_orig = $flavor_name_alt
-  } elsif ! $flavor_name_alt and $flavor_ref_alt {
+  } elsif $flavor_ref_alt {
     $flavor_ref_alt_orig = $flavor_ref_alt
-  } elsif $flavor_name_alt and $flavor_ref_alt  {
-    fail('either flavor_name_alt or flavor_ref_alt must be provided.')
   }
 
   if flavor_ref_orig {
-   tempest_config {'compute/flavor_ref':
-    value  => $flavor_ref_orig,
-    set_id => $flavor_uuid_set,
-   }
+    tempest_config {'compute/flavor_ref':
+      value  => $flavor_ref_orig,
+      set_id => $flavor_uuid_set,
+    }
   }
 
   if flavor_ref_alt_orig {

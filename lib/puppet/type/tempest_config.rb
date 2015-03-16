@@ -55,7 +55,7 @@ Puppet::Type.newtype(:tempest_config) do
           The values glance_image and network are valid.'
     validate do |value|
       if value !~ /(glance_image|network|flavor)/
-        raise(Puppet::Error, "Invalid values, Valid values are: glance_image, network")
+        raise(Puppet::Error, "Invalid values, Valid values are: glance_image, network, flavor")
       end
     end
   end
