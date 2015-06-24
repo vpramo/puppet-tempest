@@ -10,8 +10,13 @@
 # [*lock_path*]
 #   Directory to use lock files by tempest.
 #
+# [*extra_config*]
+#   this is a hash with any extra tempest configurations which are not
+#   specifically handled by any class. This will be helpful to setup bulk
+#   configurations by just specifying as hash using class param or through
+#   hiera.
 #
-
+#
 class tempest(
   # Clone config
   #
@@ -83,6 +88,8 @@ class tempest(
   # Cinder volume options
   $cinder_available          = true,
   $volume_storage_protocol   = 'iSCSI',
+  # Any extra configuration can be provided as a hash
+  $extra_config              = {},
 ) {
 
   include 'tempest::params'
@@ -292,4 +299,11 @@ class tempest(
       }
     }
   }
+
+  ##
+  # call tempest_config to create tempest configurations with extra_config
+  # param which is a hash of any extra tempest configurations which should go
+  # to tempest.conf
+  ##
+  create_resources('tempest_config',$extra_config)
 }
