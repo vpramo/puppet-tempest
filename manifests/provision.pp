@@ -22,6 +22,8 @@ class tempest::provision (
   $alt_username     = undef,
   $alt_password     = undef,
   $user_extra_roles = ['Member','ResellerAdmin'],
+  $container_format = 'bare',
+  $disk_format      = 'qcow2',
 ) {
 
   ##
@@ -98,21 +100,21 @@ class tempest::provision (
 
 
   if $imagename {
-  glance_image { $imagename:
-    ensure           => present,
-    is_public        => $image_public,
-    container_format => 'bare',
-    disk_format      => 'qcow2',
-    source           => $image_source,
-  }
+    glance_image { $imagename:
+      ensure           => present,
+      is_public        => $image_public,
+      container_format => $container_format,
+      disk_format      => $disk_format,
+      source           => $image_source,
+    }
   }
 
   if ($alt_imagename) and  ($alt_image_source) {
     glance_image { $alt_imagename:
       ensure           => present,
       is_public        => $image_public,
-      container_format => 'bare',
-      disk_format      => 'qcow2',
+      container_format => $container_format,
+      disk_format      => $disk_format,
       source           => $alt_image_source,
     }
   }
